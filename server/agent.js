@@ -1,4 +1,4 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOllama } from "@langchain/ollama";
 import { createAgent } from "langchain";
 import { MemorySaver } from "@langchain/langgraph-checkpoint";
 import { searchKnowledgeBase } from "./tools.js";
@@ -8,8 +8,9 @@ const checkpointer = new MemorySaver();
 
 export async function runAgent({ sessionId = "default", message }) {
   try {
-    const model = new ChatOpenAI({
-      model: "gpt-4o",
+    const model = new ChatOllama({
+      model: "llama3.2",
+      baseUrl: "http://localhost:11434",
       temperature: 0,
     });
 
@@ -17,8 +18,7 @@ export async function runAgent({ sessionId = "default", message }) {
       model,
       tools: [searchKnowledgeBase],
       checkpointer,
-      systemPrompt:
-        `You are a helpful AI assistant with access to a knowledge base. When users ask questions,
+      systemPrompt: `You are a helpful AI assistant with access to a knowledge base. When users ask questions,
          search the knowledge base using the available tools to find relevant information. Be concise and accurate.`,
     });
 
