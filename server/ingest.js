@@ -1,7 +1,7 @@
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { PineconeStore } from "@langchain/pinecone";
-import { PineconeEmbeddings } from "@langchain/pinecone";
+import { OllamaEmbeddings } from "@langchain/ollama";
 import { Pinecone } from "@pinecone-database/pinecone";
 
 export const ingestData = async (filePath) => {
@@ -14,7 +14,10 @@ export const ingestData = async (filePath) => {
   const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
   const index = pc.Index(process.env.PINECONE_INDEX);
 
-  const embeddings = new PineconeEmbeddings({ model: "llama-text-embed-v2" });
+  const embeddings = new OllamaEmbeddings({
+    model: process.env.OLLAMA_EMBED_MODEL || "nomic-embed-text",
+    baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+  });
   const store = await PineconeStore.fromExistingIndex(embeddings, {
     pineconeIndex: index,
   });

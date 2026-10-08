@@ -1,7 +1,7 @@
 import { tool } from "langchain";
 import { z } from "zod";
 import { PineconeStore } from "@langchain/pinecone";
-import { PineconeEmbeddings } from "@langchain/pinecone";
+import { OllamaEmbeddings } from "@langchain/ollama";
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
 
 let vectorStore;
@@ -23,8 +23,9 @@ const getVectorStore = async () => {
   const index = pc.Index(indexName);
 
   // This MUST match the embedding model used during ingestion
-  const embeddings = new PineconeEmbeddings({
-    model: "llama-text-embed-v2",
+  const embeddings = new OllamaEmbeddings({
+    model: process.env.OLLAMA_EMBED_MODEL || "nomic-embed-text",
+    baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
   });
 
   vectorStore = await PineconeStore.fromExistingIndex(embeddings, {

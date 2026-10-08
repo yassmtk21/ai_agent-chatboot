@@ -9,8 +9,8 @@ const checkpointer = new MemorySaver();
 export async function runAgent({ sessionId = "default", message }) {
   try {
     const model = new ChatOllama({
-      model: "llama3.2",
-      baseUrl: "http://localhost:11434",
+      model: process.env.OLLAMA_MODEL || "nomic-llama2-7b-chat",
+      baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
       temperature: 0,
     });
 
