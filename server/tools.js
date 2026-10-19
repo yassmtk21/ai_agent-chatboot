@@ -24,8 +24,9 @@ const getVectorStore = async () => {
 
   // This MUST match the embedding model used during ingestion
   const embeddings = new OllamaEmbeddings({
-    model: process.env.OLLAMA_EMBED_MODEL || "nomic-embed-text",
-    baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+    model: "nomic-embed-text",
+    baseUrl: "http://localhost:11434",
+    keepAlive: "30m",
   });
 
   vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
@@ -42,7 +43,7 @@ export const searchKnowledgeBase = tool(
     const store = await getVectorStore();
 
     // We fetch the top 10 most similar chunks
-    const results = await store.similaritySearch(query, 10);
+    const results = await store.similaritySearch(query, 3); // the value it was 10 in the beginning, but I changed it to 3 to reduce the number of results and make it more concise for the LLM to process.
 
     // For demo purposes
     results.forEach((r, i) => {
@@ -59,7 +60,9 @@ export const searchKnowledgeBase = tool(
   {
     name: "search_knowledge_base",
     description:
-      "Searches the internal knowledge base for technical info and documentation. Use this when you need to find information from uploaded PDF documents.",
+      "Searches the uploaded PDF documents (e.g. CVs, reports). Use ONLY when the user asks about the content of those documents. Do NOT use for greetings or general conversation.",
+    // description:
+    //   "Searches the internal knowledge base for technical info and documentation. Use this when you need to find information from uploaded PDF documents.",
     schema: z.object({
       query: z.string().describe("The search query to look up in the knowledge base"),
     }),

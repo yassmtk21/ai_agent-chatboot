@@ -15,14 +15,15 @@ export const ingestData = async (filePath) => {
   const index = pc.Index(process.env.PINECONE_INDEX);
 
   const embeddings = new OllamaEmbeddings({
-    model: process.env.OLLAMA_EMBED_MODEL || "nomic-embed-text",
-    baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+    model: "nomic-embed-text",
+    baseUrl: "http://localhost:11434",
+    keepAlive: "30m",
   });
   const store = await PineconeStore.fromExistingIndex(embeddings, {
     pineconeIndex: index,
   });
 
-  const BATCH_SIZE = 96;
+  const BATCH_SIZE = 32; //change it from 96 to 32 to reduce the number of documents processed in each batch and avoid potential memory issues during ingestion.
   for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
     const batch = chunks.slice(i, i + BATCH_SIZE);
     await store.addDocuments(batch);

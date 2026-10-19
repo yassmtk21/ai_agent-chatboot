@@ -9,17 +9,26 @@ const checkpointer = new MemorySaver();
 export async function runAgent({ sessionId = "default", message }) {
   try {
     const model = new ChatOllama({
-      model: process.env.OLLAMA_MODEL || "nomic-llama2-7b-chat",
-      baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+      model: "llama3.2",
+      baseUrl: "http://localhost:11434",
       temperature: 0,
+      keepAlive: "30m", // i add keepAlive and numCtx to avoid the error "Error: Request failed with status code 400" when the conversation is long and the context is lost.
+      numCtx: 4096,
     });
 
     const agent = createAgent({
       model,
       tools: [searchKnowledgeBase],
       checkpointer,
-      systemPrompt: `You are a helpful AI assistant with access to a knowledge base. When users ask questions,
-         search the knowledge base using the available tools to find relevant information. Be concise and accurate.`,
+      systemPrompt: `You are a helpful AI assistant with access to a knowledge base.
+
+Rules:
+- If the user greets you or makes small talk (e.g. "hi", "hello", "thanks"), reply directly and briefly. Do NOT use any tool.
+- Use the search tool ONLY when the question requires information from the uploaded documents.
+- Answer in the same language the user writes in.
+- Be concise and accurate.`,
+      // systemPrompt: `You are a helpful AI assistant with access to a knowledge base. When users ask questions,
+      //    search the knowledge base using the available tools to find relevant information. Be concise and accurate.`,
     });
 
     console.log(`🤖 Running agent for: "${message}"`);
